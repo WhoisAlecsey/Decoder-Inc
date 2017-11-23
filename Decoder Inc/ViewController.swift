@@ -17,8 +17,32 @@ struct Post : Decodable {
 
 class ViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
+    @IBAction func addTapped(_ sender: Any) {
+        let alert = UIAlertController(title: "Add JSON Cell", message: "Введите данные ячейки:", preferredStyle: .alert)
+        alert.addTextField { (jsonId) in jsonId.placeholder = "Enter ID" }
+        alert.addTextField { (jsonUserId) in jsonUserId.placeholder = "Enter User ID" }
+        alert.addTextField { (jsonTitle) in jsonTitle.placeholder = "Enter Title" }
+        alert.addTextField { (jsonBody) in jsonBody.placeholder = "Enter Body" }
+        let action = UIAlertAction(title: "Add", style: .default) { (_) in
+            guard let Id = alert.textFields![0].text else { return }
+            guard let UserId = alert.textFields![1].text else { return }
+            guard let Title = alert.textFields![2].text else { return }
+            guard let Body = alert.textFields![3].text else { return }
+            if let valueId = Int(Id), let valueUser = Int(UserId) {
+                self.add(Post.init(userId: valueId, id: valueUser, title: Title, body: Body))
+            }
+        }
+        alert.addAction(action)
+        present(alert, animated: true)
+    }
+    func add(_ value: Post){
+        let index = 0
+        posts.insert(value, at: index)
+        
+        let indexPath = IndexPath(row: index, section: 0)
+        tableView.insertRows(at: [indexPath], with: .left)
+    }
     
-    @IBOutlet weak var detailsLabel: UILabel!
     var posts = [Post]()
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -68,20 +92,22 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
         return cell
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let post = self.posts[indexPath.row]
-        //detailsLabel.text = String("\(post.title)")
-        self.createAlert(title: "Details", message: "User ID: \(post.userId) \nID: \(post.id) \nTitle: \(post.title) \nBody: \(post.body)")
+        performSegue(withIdentifier: "segue", sender: indexPath.row)
     }
-    // Mark : Change
-//    func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-//        let elementToMove = posts[fromIndexPath.row]
-//        posts.remove(at: fromIndexPath.row)
-//        posts.insert(elementToMove, at: to.row)
-//    }
-//    func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-//        return true
-//    }
-//    //
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        guard editingStyle == .delete else { return }
+        posts.remove(at: indexPath.row)
+        tableView.deleteRows(at: [indexPath], with: .automatic)
+    }
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let post = self.posts[sender as! Int]
+        let secondController = segue.destination as! ViewTwo
+        secondController.id = "ID: \(String(post.id))"
+        secondController.userId = "User ID: \(String(post.userId))"
+        secondController.titlelabel = "Title: \n\(post.title)"
+        secondController.body = "Body: \n\(post.body)"
+    }
+    
     func createAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.alert)
         alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: nil))
