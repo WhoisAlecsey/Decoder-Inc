@@ -16,31 +16,28 @@ struct Post : Decodable {
 }
 
 class ViewController: UIViewController {
+    var schet = 0;
+    var postUserID = 11;
+    
     @IBOutlet weak var tableView: UITableView!
     @IBAction func addTapped(_ sender: Any) {
         let alert = UIAlertController(title: "Add JSON Cell", message: "Введите данные ячейки:", preferredStyle: .alert)
-        alert.addTextField { (jsonId) in jsonId.placeholder = "Enter ID" }
-        alert.addTextField { (jsonUserId) in jsonUserId.placeholder = "Enter User ID" }
         alert.addTextField { (jsonTitle) in jsonTitle.placeholder = "Enter Title" }
         alert.addTextField { (jsonBody) in jsonBody.placeholder = "Enter Body" }
         let action = UIAlertAction(title: "Add", style: .default) { (_) in
-            guard let Id = alert.textFields![0].text else { return }
-            guard let UserId = alert.textFields![1].text else { return }
-            guard let Title = alert.textFields![2].text else { return }
-            guard let Body = alert.textFields![3].text else { return }
-            if let valueId = Int(Id), let valueUser = Int(UserId) {
-                self.add(Post.init(userId: valueId, id: valueUser, title: Title, body: Body))
+            guard let Title = alert.textFields![0].text else { return }
+            guard let Body = alert.textFields![1].text else { return }
+
+            self.schet += 1
+            if ((self.schet > 100) && (self.schet % 10 == 0)) {
+                self.postUserID += 1
             }
+            self.posts.append(Post.init(userId: self.postUserID, id: self.schet, title: Title, body: Body))
+            self.tableView.reloadData()
+            self.createAlert(title: "Успешно", message: "Новый элемент добавлен!")
         }
         alert.addAction(action)
         present(alert, animated: true)
-    }
-    func add(_ value: Post){
-        let index = 0
-        posts.insert(value, at: index)
-        
-        let indexPath = IndexPath(row: index, section: 0)
-        tableView.insertRows(at: [indexPath], with: .left)
     }
     
     var posts = [Post]()
@@ -78,7 +75,8 @@ extension ViewController {
 
 extension ViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.posts.count
+        schet = self.posts.count
+        return schet
     }
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 70
