@@ -8,31 +8,46 @@
 
 import UIKit
 
-struct Post : Decodable {
+class Post : Decodable {
+    init(){
+        userId = 1
+        id = 1
+        title = "Title"
+        body = "Body"
+    }
+    init(userId: Int, id: Int, title: String, body: String) {
+        self.userId = userId
+        self.id = id
+        self.title = title
+        self.body = body
+    }
     var userId : Int
     var id : Int
     var title : String
     var body : String
 }
 
+protocol ProtocolRun {
+    func launchObjectSuccess()
+}
+
 class ViewController: UIViewController {
-    var schet = 0;
-    var postUserID = 11;
-    
+    var postUserID = 0;
+
     @IBOutlet weak var tableView: UITableView!
     @IBAction func addTapped(_ sender: Any) {
-        let alert = UIAlertController(title: "Add JSON Cell", message: "Введите данные ячейки:", preferredStyle: .alert)
+        let alert = UIAlertController(title: "Создание ячейки", message: "Введите данные ячейки:", preferredStyle: .alert)
         alert.addTextField { (jsonTitle) in jsonTitle.placeholder = "Enter Title" }
         alert.addTextField { (jsonBody) in jsonBody.placeholder = "Enter Body" }
         let action = UIAlertAction(title: "Add", style: .default) { (_) in
             guard let Title = alert.textFields![0].text else { return }
             guard let Body = alert.textFields![1].text else { return }
 
-            self.schet += 1
-            if ((self.schet > 100) && (self.schet % 10 == 0)) {
+            self.postUserID = lround(Double(self.posts.count) / 10.0)
+            if (self.posts.count % self.postUserID == 0) {
                 self.postUserID += 1
             }
-            self.posts.append(Post.init(userId: self.postUserID, id: self.schet, title: Title, body: Body))
+            self.posts.append(Post.init(userId: self.postUserID, id: self.posts.count + 1, title: Title, body: Body))
             self.tableView.reloadData()
             self.createAlert(title: "Успешно", message: "Новый элемент добавлен!")
         }
@@ -75,8 +90,7 @@ extension ViewController {
 
 extension ViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        schet = self.posts.count
-        return schet
+        return self.posts.count
     }
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 70
@@ -100,10 +114,9 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let post = self.posts[sender as! Int]
         let secondController = segue.destination as! ViewTwo
-        secondController.id = "ID: \(String(post.id))"
-        secondController.userId = "User ID: \(String(post.userId))"
-        secondController.titlelabel = "Title: \n\(post.title)"
-        secondController.body = "Body: \n\(post.body)"
+        secondController.post = post
+        secondController.tableView = tableView
+        self.tableView.reloadData()
     }
     
     func createAlert(title: String, message: String) {
