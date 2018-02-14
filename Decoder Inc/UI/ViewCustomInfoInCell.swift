@@ -13,9 +13,4 @@ class CustomTableViewCell: UITableViewCell {
     @IBOutlet weak var cellLable: UILabel!
     @IBOutlet weak var cellLableDelegate: UILabel!
     
-    
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        
-    }
 }

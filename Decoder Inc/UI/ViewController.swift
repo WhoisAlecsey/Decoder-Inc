@@ -8,29 +8,6 @@
 
 import UIKit
 
-class Post : Decodable {
-    init(){
-        userId = 1
-        id = 1
-        title = "Title"
-        body = "Body"
-    }
-    init(userId: Int, id: Int, title: String, body: String) {
-        self.userId = userId
-        self.id = id
-        self.title = title
-        self.body = body
-    }
-    var userId : Int
-    var id : Int
-    var title : String
-    var body : String
-}
-
-protocol ProtocolRun {
-    func launchObjectSuccess()
-}
-
 class ViewController: UIViewController {
     var postUserID = 0;
 
@@ -86,6 +63,15 @@ extension ViewController {
             }
         }.resume()
     }
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        performSegue(withIdentifier: "segue", sender: indexPath.row)
+    }
+    
+    func createAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.alert)
+        alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+    }
 }
 
 extension ViewController: UITableViewDataSource, UITableViewDelegate {
@@ -103,9 +89,7 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
         cell.cellLableDelegate.text = "Title: \(post.title)"
         return cell
     }
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        performSegue(withIdentifier: "segue", sender: indexPath.row)
-    }
+
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         guard editingStyle == .delete else { return }
         posts.remove(at: indexPath.row)
@@ -119,10 +103,5 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
         self.tableView.reloadData()
     }
     
-    func createAlert(title: String, message: String) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.alert)
-        alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: nil))
-        self.present(alert, animated: true, completion: nil)
-    }
 }
 
